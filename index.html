@@ -768,8 +768,6 @@ function getExpandedSizes(activeIdx) {
   return sizes;
 }
 
-// Label angles: fan from -36° to +36° (Philosophy at top-right, History at bottom-right)
-const LABEL_ANGLES = DISCIPLINES.map((_, i) => (-36 + i * 12) * Math.PI / 180);
 
 function buildRings() {
   const container = document.getElementById('circles-container');
@@ -845,16 +843,27 @@ function updateLabelPositions(expandedSizes) {
   const containerSize = cRect.width;
   const labelGap = 15;
 
+  // Evenly space labels vertically across the full height of the outermost circle
+  const outerRadius = containerSize / 2;
+  const totalSpan = outerRadius * 2 * 0.75; // use 75% of diameter for label spread
+  const topY = cy - totalSpan / 2;
+  const step = totalSpan / (DISCIPLINES.length - 1);
+
   DISCIPLINES.forEach((d, i) => {
     const pct = expandedSizes ? expandedSizes[i] : d.pct;
-    const angle = LABEL_ANGLES[i];
     const radius = pct / 100 * containerSize / 2;
 
-    const anchorX = cx + radius * Math.cos(angle);
-    const anchorY = cy - radius * Math.sin(angle);
+    // Label positioned at evenly spaced Y
+    const labelX = cx + outerRadius + labelGap;
+    const labelY = topY + i * step;
 
-    const labelX = cx + (containerSize / 2) + labelGap;
-    const labelY = anchorY;
+    // Anchor point: where the connector meets the ring edge
+    // Compute angle from center to the label position, then find ring edge
+    const dx = labelX - cx;
+    const dy = labelY - cy;
+    const angleToLabel = Math.atan2(dy, dx);
+    const anchorX = cx + radius * Math.cos(angleToLabel);
+    const anchorY = cy + radius * Math.sin(angleToLabel);
 
     const g = document.getElementById('connector-' + i);
     const line = g.querySelector('line');
