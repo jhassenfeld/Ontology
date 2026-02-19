@@ -134,6 +134,7 @@ html, body {
   color: #ccc;
   white-space: pre-wrap;
   word-wrap: break-word;
+  transition: opacity 0.4s ease;
 }
 
 .intro-text .cursor {
@@ -274,19 +275,40 @@ html, body {
 
 .ring:hover { border-width: 3px; }
 
-.ring-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: clamp(0.4rem, 1.2vw, 0.6rem);
-  pointer-events: none;
-  white-space: nowrap;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+.ring-label { display: none; }
+
+/* External labels with connector lines */
+#labels-svg {
   position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-shadow: 0 0 6px currentColor;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
 }
 
-.ring.active .ring-label { opacity: 0; }
+.connector-line {
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.4;
+  transition: opacity 0.4s ease;
+}
+
+.connector-dot {
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+.external-label {
+  position: absolute;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 0 6px currentColor;
+  transition: top 0.7s cubic-bezier(0.4,0,0.2,1),
+              left 0.7s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.4s ease;
+}
 
 .ring.inner-hidden {
   opacity: 0;
@@ -301,13 +323,13 @@ html, body {
   transform: translate(-50%, -50%);
   width: 80%;
   max-width: 500px;
-  max-height: 72%;
+  max-height: 76%;
   overflow-y: auto;
   pointer-events: none;
   opacity: 0;
   z-index: 15;
   transition: opacity 0.45s ease 0.25s;
-  padding: 0.75rem;
+  padding: 0.5rem;
 }
 
 .detail-content.visible {
@@ -331,7 +353,7 @@ html, body {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.45rem;
   cursor: pointer;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   transition: background 0.2s ease;
   color: inherit;
 }
@@ -341,25 +363,25 @@ html, body {
 
 .detail-content h2 {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.35rem;
 }
 
 .detail-description {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 300;
   opacity: 0.8;
-  margin-bottom: 0.6rem;
-  line-height: 1.7;
+  margin-bottom: 0.35rem;
+  line-height: 1.55;
 }
 
 .detail-ontology {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.5rem;
   line-height: 2;
-  margin-bottom: 1.25rem;
-  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.7rem;
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
@@ -369,7 +391,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.4rem;
 }
 
 .questions-header h3 {
@@ -399,14 +421,14 @@ html, body {
 .questions-list {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.4rem;
 }
 
 .question-card {
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  padding: 0.75rem 0.9rem;
+  padding: 0.55rem 0.75rem;
   animation: fadeUp 0.3s ease both;
 }
 
@@ -420,25 +442,24 @@ html, body {
 }
 
 .question-card .q-text {
+  display: block;
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.45;
-  margin-bottom: 0.2rem;
-}
-
-.question-card .q-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  font-size: 0.72rem;
-  font-weight: 500;
   text-decoration: none;
-  opacity: 0.5;
   transition: opacity 0.2s;
 }
 
-.question-card .q-link:hover { opacity: 1; text-decoration: underline; }
-.question-card .q-link svg { width: 11px; height: 11px; }
+.question-card .q-text:hover { text-decoration: underline; }
+
+.question-card .q-text .q-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  opacity: 0.35;
+  vertical-align: baseline;
+  margin-left: 0.25rem;
+}
 
 /* Home button on circles screen */
 .home-btn {
@@ -461,9 +482,10 @@ html, body {
 @media (max-width: 600px) {
   .landing-title { font-size: 0.8rem; }
   .menu-item { font-size: 0.55rem; }
-  .detail-content h2 { font-size: 1.4rem; }
-  .detail-content { max-height: 68%; padding: 0.5rem; }
-  .ring-label { font-size: 0.38rem; }
+  .detail-content h2 { font-size: 1.2rem; }
+  .detail-content { max-height: 70%; }
+  .detail-description { font-size: 0.78rem; }
+  .external-label { font-size: 0.4rem; }
 }
 </style>
 </head>
@@ -504,17 +526,21 @@ html, body {
 // DATA
 // ═══════════════════════════════════════
 
-const INTRO_LINES = [
-  "There are things. But that doesn't really tell you much on its own.",
-  "If you want to know anything, you have to know what kind of things there are.",
-  "Some things, like an apple, are red and sweet. They have color and taste.",
-  "Some things, like the number 6, are even, triangular, and perfect.",
-  "Imagine a big basket. It holds everything that exists. That basket is your ontology. It is all the things you believe exist.",
-  "What kinds of things are in your basket?",
-  "I bet apples are in there. Is the number 6? Is justice?",
-  "The branches of human knowledge, sometimes called disciplines, have different ontologies, that is, they study different kinds of things.",
-  "This tool organizes human knowledge into a Venn diagram of ontology where each discipline studies a subset of the ontology of the previous discipline. It shows something about how ontology structures the kinds of questions we ask and the kinds of answers we find.",
-  "What kinds of things are you most curious about? What questions do you have?"
+const INTRO_PAGES = [
+  [
+    "There are things. But that doesn't really tell you much on its own.",
+    "If you want to know anything, you have to know what kind of things there are.",
+    "Some things, like an apple, are red and sweet. They have color and taste.",
+    "Some things, like the number 6, are even, triangular, and perfect.",
+  ],
+  [
+    "Imagine a big basket. It holds everything that exists. That basket is your ontology. It is all the things you believe exist.",
+    "What kinds of things are in your ontology? What do you believe exists?",
+    "I bet apples are in there. Is the number 6? Is justice?",
+    "The branches of human knowledge, sometimes called disciplines, have different ontologies, that is, they study different kinds of things.",
+    "This tool organizes human knowledge into a Venn diagram of ontology where each discipline studies a subset of the ontology of the previous discipline. It shows something about how ontology structures the kinds of questions we ask and the kinds of answers we find.",
+    "What kinds of things are you most curious about? What questions do you have?"
+  ]
 ];
 
 const DISCIPLINES = [
@@ -524,12 +550,12 @@ const DISCIPLINES = [
     pct: 100,
     defaultQuestions: ["What makes an action \"right\" or \"wrong,\" and how do we tell the difference?","What IS reality really? How do we know?"]},
   { id: 'math', name: 'Math', color: '#2563EB', bg: '#0c1a3d', text: '#93b4f5',
-    description: 'Math studies the subset of things that can be quantified, that is, described with numbers. Even the parts of math that seem to deal with non-numerical things, like sets, still talk in terms of quantities like the set with no elements or the dimensionality of a space.',
+    description: 'Math studies the subset of things that can be quantified, that is, described with numbers. Even parts of math like set theory or topology still talk in terms of quantities like the set with no elements or the dimensionality of a space.',
     ontology: 'Subset of all things that can be quantified',
     pct: 85,
     defaultQuestions: ["Is every even number greater than 2 the sum of two prime numbers?","Are there more integers or more real numbers?"]},
   { id: 'physics', name: 'Physics', color: '#0891B2', bg: '#071e26', text: '#7dd3e8',
-    description: "Physics studies only those things that exist in time and space. That is, for physics to study a thing it has to have a where and a when. It has to exist in a location at a particular time. It doesn't study the properties of the number two, which, whatever it is, is neither temporal or spatial.",
+    description: "Physics studies only those things that exist in time and space. They have to exist in a location at a particular time. It doesn't study the properties of the number two, which, whatever it is, is neither temporal or spatial.",
     ontology: 'Subset of quantified things that exist in time and space',
     pct: 71,
     defaultQuestions: ["What is gravity, and why does it pull objects down to the ground?","How does a roller coaster work?"]},
@@ -592,6 +618,7 @@ function goToCircles() {
 // ═══════════════════════════════════════
 // TYPEWRITER (line-by-line with continue)
 // ═══════════════════════════════════════
+let introPageIndex = 0;
 let introLineIndex = 0;
 let introCharIndex = 0;
 let introTyping = false;
@@ -604,6 +631,8 @@ function stopTypewriter() {
 function startTypewriter() {
   const el = document.getElementById('intro-text');
   el.innerHTML = '';
+  el.style.opacity = '1';
+  introPageIndex = 0;
   introLineIndex = 0;
   introCharIndex = 0;
   introTyping = false;
@@ -611,8 +640,13 @@ function startTypewriter() {
 }
 
 function typeLine() {
-  if (introLineIndex >= INTRO_LINES.length) {
-    showFinalPrompt();
+  const currentPage = INTRO_PAGES[introPageIndex];
+  if (introLineIndex >= currentPage.length) {
+    if (introPageIndex < INTRO_PAGES.length - 1) {
+      advanceIntroPage();
+    } else {
+      showFinalPrompt();
+    }
     return;
   }
 
@@ -620,7 +654,7 @@ function typeLine() {
   introCharIndex = 0;
   const el = document.getElementById('intro-text');
   const wrapper = document.getElementById('intro-wrapper');
-  const line = INTRO_LINES[introLineIndex];
+  const line = currentPage[introLineIndex];
 
   // Create a span for this line
   const lineSpan = document.createElement('span');
@@ -658,15 +692,32 @@ function typeLine() {
       el.appendChild(document.createElement('br'));
       el.appendChild(document.createElement('br'));
 
-      if (introLineIndex < INTRO_LINES.length - 1) {
-        showContinueBtn();
-      } else {
+      const currentPage = INTRO_PAGES[introPageIndex];
+      const isLastLineOnPage = introLineIndex >= currentPage.length - 1;
+      const isLastPage = introPageIndex >= INTRO_PAGES.length - 1;
+
+      if (isLastLineOnPage && isLastPage) {
         showFinalPrompt();
+      } else {
+        showContinueBtn();
       }
     }
   }
 
   typewriterTimer = setTimeout(typeChar, 300);
+}
+
+function advanceIntroPage() {
+  const el = document.getElementById('intro-text');
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.innerHTML = '';
+    introPageIndex++;
+    introLineIndex = 0;
+    introCharIndex = 0;
+    el.style.opacity = '1';
+    setTimeout(() => typeLine(), 300);
+  }, 450);
 }
 
 function showContinueBtn() {
@@ -717,6 +768,9 @@ function getExpandedSizes(activeIdx) {
   return sizes;
 }
 
+// Label angles: fan from -36° to +36° (Philosophy at top-right, History at bottom-right)
+const LABEL_ANGLES = DISCIPLINES.map((_, i) => (-36 + i * 12) * Math.PI / 180);
+
 function buildRings() {
   const container = document.getElementById('circles-container');
   DISCIPLINES.forEach((d, i) => {
@@ -728,16 +782,6 @@ function buildRings() {
     ring.style.backgroundColor = d.bg;
     ring.style.border = '2px solid ' + d.color;
     ring.style.zIndex = i;
-
-    const label = document.createElement('span');
-    label.className = 'ring-label';
-    label.textContent = d.name;
-    label.style.color = d.color;
-    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
-    label.style.top = ((d.pct - nextPct) / d.pct * 50 / 2) + '%';
-    label.style.left = '50%';
-    label.style.transform = 'translate(-50%, -50%)';
-    ring.appendChild(label);
 
     const detail = document.createElement('div');
     detail.className = 'detail-content';
@@ -755,6 +799,90 @@ function buildRings() {
   });
 }
 
+function buildExternalLabels() {
+  const app = document.querySelector('.app');
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'labels-svg';
+  app.appendChild(svg);
+
+  DISCIPLINES.forEach((d, i) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.id = 'connector-' + i;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.classList.add('connector-line');
+    line.setAttribute('stroke', d.color);
+    g.appendChild(line);
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.classList.add('connector-dot');
+    dot.setAttribute('r', '2');
+    dot.setAttribute('fill', d.color);
+    g.appendChild(dot);
+
+    svg.appendChild(g);
+
+    const label = document.createElement('span');
+    label.className = 'external-label';
+    label.id = 'ext-label-' + i;
+    label.textContent = d.name;
+    label.style.color = d.color;
+    app.appendChild(label);
+  });
+
+  updateLabelPositions(null);
+}
+
+function updateLabelPositions(expandedSizes) {
+  const container = document.getElementById('circles-container');
+  const app = document.querySelector('.app');
+  const cRect = container.getBoundingClientRect();
+  const aRect = app.getBoundingClientRect();
+
+  const cx = cRect.left + cRect.width / 2 - aRect.left;
+  const cy = cRect.top + cRect.height / 2 - aRect.top;
+  const containerSize = cRect.width;
+  const labelGap = 15;
+
+  DISCIPLINES.forEach((d, i) => {
+    const pct = expandedSizes ? expandedSizes[i] : d.pct;
+    const angle = LABEL_ANGLES[i];
+    const radius = pct / 100 * containerSize / 2;
+
+    const anchorX = cx + radius * Math.cos(angle);
+    const anchorY = cy - radius * Math.sin(angle);
+
+    const labelX = cx + (containerSize / 2) + labelGap;
+    const labelY = anchorY;
+
+    const g = document.getElementById('connector-' + i);
+    const line = g.querySelector('line');
+    const dot = g.querySelector('circle');
+
+    line.setAttribute('x1', anchorX);
+    line.setAttribute('y1', anchorY);
+    line.setAttribute('x2', labelX);
+    line.setAttribute('y2', labelY);
+
+    dot.setAttribute('cx', anchorX);
+    dot.setAttribute('cy', anchorY);
+
+    const label = document.getElementById('ext-label-' + i);
+    label.style.left = labelX + 'px';
+    label.style.top = labelY + 'px';
+    label.style.transform = 'translateY(-50%)';
+
+    const isHidden = pct === 0;
+    const isActive = expandedSizes && activeIndex === i;
+    const shouldHide = isHidden || isActive;
+
+    label.style.opacity = shouldHide ? '0' : '1';
+    line.style.opacity = shouldHide ? '0' : '0.4';
+    dot.style.opacity = shouldHide ? '0' : '0.5';
+  });
+}
+
 function openDiscipline(index) {
   activeIndex = index;
   const d = DISCIPLINES[index];
@@ -765,7 +893,6 @@ function openDiscipline(index) {
 
   DISCIPLINES.forEach((disc, i) => {
     const ring = document.getElementById('ring-' + i);
-    const label = ring.querySelector('.ring-label');
 
     if (sizes[i] === 0) {
       ring.classList.add('inner-hidden');
@@ -808,11 +935,11 @@ function openDiscipline(index) {
     } else if (i < index) {
       ring.classList.remove('active');
       ring.style.cursor = 'pointer';
-      const nextSize = sizes[i + 1] || 0;
-      const bandRatio = (sizes[i] - nextSize) / sizes[i];
-      label.style.top = (bandRatio * 50 / 2) + '%';
     }
   });
+
+  updateLabelPositions(sizes);
+  setTimeout(() => updateLabelPositions(sizes), 750);
 }
 
 function closeDiscipline() {
@@ -825,17 +952,17 @@ function closeDiscipline() {
 
   DISCIPLINES.forEach((d, i) => {
     const ring = document.getElementById('ring-' + i);
-    const label = ring.querySelector('.ring-label');
     ring.classList.remove('active', 'inner-hidden');
     ring.style.width = d.pct + '%';
     ring.style.height = d.pct + '%';
     ring.style.cursor = 'pointer';
-    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
-    label.style.top = ((d.pct - nextPct) / d.pct * 50 / 2) + '%';
   });
 
   setTimeout(() => { detail.innerHTML = ''; }, 500);
   activeIndex = -1;
+
+  updateLabelPositions(null);
+  setTimeout(() => updateLabelPositions(null), 750);
 }
 
 // ═══════════════════════════════════════
@@ -860,13 +987,8 @@ function pickRandomQuestions(disciplineId, count = 3) {
 function renderCards(questions, d) {
   return questions.map(q => `
     <div class="question-card">
-      <div class="q-text" style="color:${d.text}">${q.question}</div>
-      <a class="q-link" href="https://en.wikipedia.org/wiki/${q.article}" target="_blank" rel="noopener" style="color:${d.color}" onclick="event.stopPropagation()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-          <polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
-        </svg>
-        Wikipedia
+      <a class="q-text" href="https://en.wikipedia.org/wiki/${q.article}" target="_blank" rel="noopener" style="color:${d.text}" onclick="event.stopPropagation()">
+        ${q.question}<svg class="q-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
       </a>
     </div>
   `).join('');
@@ -899,6 +1021,11 @@ document.addEventListener('keydown', e => {
 // INIT
 // ═══════════════════════════════════════
 buildRings();
+buildExternalLabels();
+window.addEventListener('resize', () => {
+  const sizes = activeIndex >= 0 ? getExpandedSizes(activeIndex) : null;
+  updateLabelPositions(sizes);
+});
 </script>
 </body>
 </html>
