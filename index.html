@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ontology</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: 'Source Sans 3', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════
+   SCREEN SYSTEM — only one visible at a time
+   ════════════════════════════════════ */
+.screen {
+  position: absolute; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ════════════════════════════════════
+   SCREEN 1 — LANDING (retro menu)
+   ════════════════════════════════════ */
+#landing {
+  flex-direction: column;
+  gap: 3rem;
+  padding: 2rem;
+}
+
+.landing-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1rem, 3.5vw, 1.6rem);
+  text-align: center;
+  line-height: 2;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.landing-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-item {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.6rem, 2vw, 0.85rem);
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.8rem 1.5rem;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+  position: relative;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.menu-item:hover, .menu-item.selected {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  left: -1.5em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.menu-item:hover::before, .menu-item.selected::before {
+  content: '▸';
+  opacity: 1;
+}
+
+.landing-blink {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: #555;
+  text-align: center;
+  animation: blink 1.2s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ════════════════════════════════════
+   SCREEN 2 — TYPEWRITER INTRO
+   ════════════════════════════════════ */
+#intro {
+  flex-direction: column;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.intro-wrapper {
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.intro-wrapper::-webkit-scrollbar { width: 4px; }
+.intro-wrapper::-webkit-scrollbar-track { background: transparent; }
+.intro-wrapper::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+.intro-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.55rem, 1.5vw, 0.72rem);
+  line-height: 2.4;
+  color: #ccc;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.intro-text .cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: #fff;
+  vertical-align: text-bottom;
+  animation: blink 0.7s step-end infinite;
+  margin-left: 2px;
+}
+
+.intro-text em {
+  color: #aaa;
+  font-style: italic;
+}
+
+.intro-text strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.skip-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  background: none;
+  border: 1px solid #444;
+  color: #666;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  z-index: 100;
+}
+
+.skip-btn:hover {
+  color: #fff;
+  border-color: #888;
+}
+
+.continue-btn {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  padding: 0.6rem 0;
+  margin-top: 0.8rem;
+  transition: color 0.15s ease;
+  animation: pulse 1.5s ease infinite;
+}
+
+.continue-btn:hover { color: #fff; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ════════════════════════════════════
+   SCREEN 3 — CIRCLES
+   ════════════════════════════════════ */
+#circles-screen {
+  overflow: hidden;
+}
+
+.app {
+  position: absolute; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-header {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 20;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.app-header.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.app-header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.65rem, 2vw, 0.9rem);
+  font-weight: 400;
+  color: #aaa;
+  text-shadow: 0 0 8px rgba(255,255,255,0.15);
+}
+
+.app-header p {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+/* Circles Container */
+.circles-container {
+  position: relative;
+  width: min(80vmin, 520px);
+  height: min(80vmin, 520px);
+  transition: width 0.7s cubic-bezier(0.4,0,0.2,1),
+              height 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+.circles-container.expanded {
+  width: 92vmin;
+  height: 92vmin;
+}
+
+/* Rings */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: width 0.7s cubic-bezier(0.4,0,0.2,1),
+              height 0.7s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.4s ease,
+              border-color 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.ring:hover { border-width: 3px; }
+
+.ring-label {
+  font-family: 'Press Start 2P', monospace;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.4s ease, transform 0.4s ease, font-size 0.3s ease;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-shadow: 0 0 6px currentColor;
+}
+
+.ring.active .ring-label { opacity: 0; }
+
+.ring.inner-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, width 0.7s cubic-bezier(0.4,0,0.2,1), height 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Detail inside active ring */
+.detail-content {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 500px;
+  max-height: 72%;
+  overflow-y: auto;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 15;
+  transition: opacity 0.45s ease 0.25s;
+  padding: 0.75rem;
+}
+
+.detail-content.visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.detail-content::-webkit-scrollbar { width: 4px; }
+.detail-content::-webkit-scrollbar-track { background: transparent; }
+.detail-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 99px;
+  padding: 0.4rem 0.9rem 0.4rem 0.65rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: background 0.2s ease;
+  color: inherit;
+}
+
+.back-btn:hover { background: rgba(0,0,0,0.6); }
+.back-btn svg { width: 14px; height: 14px; }
+
+.detail-content h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.detail-description {
+  font-size: 0.9rem;
+  font-weight: 300;
+  opacity: 0.8;
+  margin-bottom: 0.6rem;
+  line-height: 1.7;
+}
+
+.detail-ontology {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  line-height: 2;
+  margin-bottom: 1.25rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+.questions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.questions-header h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: inherit;
+}
+
+.refresh-btn:hover { background: rgba(0,0,0,0.5); }
+.refresh-btn svg { width: 12px; height: 12px; }
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.question-card {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  animation: fadeUp 0.3s ease both;
+}
+
+.question-card:nth-child(1) { animation-delay: 0.05s; }
+.question-card:nth-child(2) { animation-delay: 0.1s; }
+.question-card:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-card .q-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 0.2rem;
+}
+
+.question-card .q-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.question-card .q-link:hover { opacity: 1; text-decoration: underline; }
+.question-card .q-link svg { width: 11px; height: 11px; }
+
+/* Home button on circles screen */
+.home-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  background: none;
+  border: 1px solid #333;
+  color: #555;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  z-index: 100;
+}
+
+.home-btn:hover { color: #fff; border-color: #888; }
+
+@media (max-width: 600px) {
+  .landing-title { font-size: 0.8rem; }
+  .menu-item { font-size: 0.55rem; }
+  .detail-content h2 { font-size: 1.4rem; }
+  .detail-content { max-height: 68%; padding: 0.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN 1: LANDING ═══ -->
+<div class="screen active" id="landing">
+  <div class="landing-title">ONTOLOGY</div>
+  <div class="landing-menu">
+    <button class="menu-item" onclick="goToIntro()">What is Ontology?</button>
+    <button class="menu-item" onclick="goToCircles()">Explore All Knowledge</button>
+  </div>
+  <div class="landing-blink">PRESS TO BEGIN</div>
+</div>
+
+<!-- ═══ SCREEN 2: TYPEWRITER INTRO ═══ -->
+<div class="screen" id="intro">
+  <div class="intro-wrapper" id="intro-wrapper">
+    <div class="intro-text" id="intro-text"></div>
+  </div>
+  <button class="skip-btn" id="skip-btn" onclick="goToCircles()">SKIP ▸</button>
+</div>
+
+<!-- ═══ SCREEN 3: CIRCLES ═══ -->
+<div class="screen" id="circles-screen">
+  <div class="app">
+    <div class="app-header" id="app-header">
+      <h1>EXPLORE ALL KNOWLEDGE</h1>
+      <p>CLICK A CIRCLE</p>
+    </div>
+    <div class="circles-container" id="circles-container"></div>
+  </div>
+  <button class="home-btn" onclick="goToLanding()">◂ MENU</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+
+const INTRO_LINES = [
+  "There are things.",
+  "But that doesn't really tell you much on its own.",
+  "If you want to know anything, you have to know what kind of things there are.",
+  "Some things, like an apple, are red and sweet. They have color and taste.",
+  "But not everything is like an apple. Some things are very different kinds of things.",
+  "Some things, like the number 6, are even, triangular, and perfect.",
+  "Imagine a big basket. It holds everything that exists. That basket is your ontology. It is all the things you believe exist.",
+  "What kinds of things are in your basket?",
+  "I bet apples are in there. Is the number 6? Is justice?",
+  "The branches of human knowledge, sometimes called disciplines, have different ontologies, that is, they study different kinds of things.",
+  "This tool organizes human knowledge into a Venn diagram of ontology where each discipline studies a subset of the ontology of the previous discipline. It shows something about how ontology structures the kinds of questions we ask and the kinds of answers we find.",
+  "What kinds of things are you most curious about? What questions do you have?"
+];
+
+const DISCIPLINES = [
+  { id: 'philosophy', name: 'Philosophy', color: '#8B5CF6', bg: '#1a0f2e', text: '#d4bfff',
+    description: 'Philosophy studies everything. Full stop. Anything that anyone thinks could be a thing could be a thing that philosophy asks a question about. It includes things like minds and bodies as well as numbers and concepts. Everything.',
+    ontology: 'All things',
+    pct: 100,
+    defaultQuestions: ["What makes an action \"right\" or \"wrong,\" and how do we tell the difference?","What IS reality really? How do we know?"]},
+  { id: 'math', name: 'Math', color: '#2563EB', bg: '#0c1a3d', text: '#93b4f5',
+    description: 'Math studies the subset of things that can be quantified, that is, described with numbers. Even the parts of math that seem to deal with non-numerical things, like sets, still talk in terms of quantities like the set with no elements or the dimensionality of a space.',
+    ontology: 'Subset of all things that can be quantified',
+    pct: 85,
+    defaultQuestions: ["Is every even number greater than 2 the sum of two prime numbers?","Are there more integers or more real numbers?"]},
+  { id: 'physics', name: 'Physics', color: '#0891B2', bg: '#071e26', text: '#7dd3e8',
+    description: "Physics studies only those things that exist in time and space. That is, for physics to study a thing it has to have a where and a when. It has to exist in a location at a particular time. It doesn't study the properties of the number two, which, whatever it is, is neither temporal or spatial.",
+    ontology: 'Subset of quantified things that exist in time and space',
+    pct: 71,
+    defaultQuestions: ["What is gravity, and why does it pull objects down to the ground?","How does a roller coaster work?"]},
+  { id: 'chemistry', name: 'Chemistry', color: '#059669', bg: '#06231a', text: '#6ee7b7',
+    description: 'Chemistry studies the things that are atoms (or parts of atoms). Atoms are just a few of things that exist in time and space. It turns out though, that these atomic things make up a huge part of the things that we can see, hear, taste, smell, touch, and otherwise interact with.',
+    ontology: 'Subset of spatial and temporal things that are made of atoms',
+    pct: 59,
+    defaultQuestions: ["How do the elements in the periodic table relate to each other?","Why do some metals rust?"]},
+  { id: 'biology', name: 'Biology', color: '#65A30D', bg: '#162008', text: '#bef264',
+    description: 'Biology studies the special group of things that are made of atoms that are alive, whatever that means. These living collections of atoms do a lot of surprising things like reproduce, metabolize energy, and so much more.',
+    ontology: 'Subset of atomic things that are alive',
+    pct: 47,
+    defaultQuestions: ["How does DNA help us inherit traits from our parents?","How do plants convert sunlight into energy?"]},
+  { id: 'anthropology', name: 'Anthropology', color: '#D97706', bg: '#271a04', text: '#fbbf24',
+    description: 'Anthropology studies the subset of living things that are people. It asks how people got to be the way they are, and how their biology allows them to do certain special people things like make culture.',
+    ontology: 'Subset of living things that are people',
+    pct: 36,
+    defaultQuestions: ["How did human brains develop over time?","Why do people walk on two legs?"]},
+  { id: 'history', name: 'History', color: '#DC2626', bg: '#2a0a0a', text: '#fca5a5',
+    description: 'History studies the subset of people that make societies. It traces how those societies change over time with special focus on the written traces those societies leave behind.',
+    ontology: 'Subset of people that make societies',
+    pct: 26,
+    defaultQuestions: ["Why did ancient civilizations build their cities near rivers?","How did the Industrial Revolution change the way people lived?"]}
+];
+
+const QUESTIONS_DB = {"philosophy":[{"question":"What does it mean for something to be 'real'?","article":"Reality"},{"question":"How do we know what we think we know?","article":"Epistemology"},{"question":"Is there such a thing as free will?","article":"Free_will"},{"question":"What makes an action morally right or wrong?","article":"Ethics"},{"question":"Does God exist, and can it be proven?","article":"Existence_of_God"},{"question":"What is consciousness, and where does it come from?","article":"Consciousness"},{"question":"What is the meaning of life?","article":"Meaning_of_life"},{"question":"What is truth?","article":"Truth"},{"question":"What is justice?","article":"Justice"},{"question":"What makes something beautiful?","article":"Aesthetics"},{"question":"Can we ever be certain about anything?","article":"Skepticism"},{"question":"What is the nature of the mind?","article":"Philosophy_of_mind"},{"question":"Do humans have inherent rights?","article":"Natural_rights_and_legal_rights"},{"question":"Is the universe deterministic?","article":"Determinism"},{"question":"What is the relationship between language and thought?","article":"Philosophy_of_language"},{"question":"What makes a life well-lived?","article":"Eudaimonia"},{"question":"Is morality relative to culture?","article":"Moral_relativism"},{"question":"What obligations do we have to other people?","article":"Social_contract"},{"question":"Can machines think?","article":"Chinese_room"},{"question":"What is the self?","article":"Personal_identity"},{"question":"What did Plato mean by the allegory of the cave?","article":"Allegory_of_the_cave"},{"question":"Is there an objective reality independent of observation?","article":"Objectivity_(philosophy)"},{"question":"What is the problem of evil?","article":"Problem_of_evil"},{"question":"Can something come from nothing?","article":"Why_there_is_anything_at_all"},{"question":"What is the trolley problem really asking?","article":"Trolley_problem"},{"question":"What did Nietzsche mean by 'God is dead'?","article":"God_is_dead"},{"question":"What is existentialism?","article":"Existentialism"},{"question":"What is the difference between knowledge and belief?","article":"Justified_true_belief"},{"question":"What is utilitarianism?","article":"Utilitarianism"},{"question":"How did Aristotle think about virtue?","article":"Virtue_ethics"},{"question":"What is nihilism?","article":"Nihilism"},{"question":"What is Stoicism, and why is it popular again?","article":"Stoicism"},{"question":"Is time real, or is it a human construction?","article":"Philosophy_of_time"},{"question":"What is the hard problem of consciousness?","article":"Hard_problem_of_consciousness"},{"question":"What is the 'ship of Theseus' paradox?","article":"Ship_of_Theseus"},{"question":"What is the difference between 'is' and 'ought'?","article":"Is%E2%80%93ought_problem"},{"question":"What did Kant mean by the categorical imperative?","article":"Categorical_imperative"},{"question":"What is phenomenology?","article":"Phenomenology_(philosophy)"},{"question":"Do we perceive reality as it actually is?","article":"Naive_realism"},{"question":"What does Occam's razor tell us about truth?","article":"Occam%27s_razor"}],"math":[{"question":"Why can't you divide by zero?","article":"Division_by_zero"},{"question":"What is infinity, and are there different sizes of it?","article":"Infinity"},{"question":"What makes prime numbers so important?","article":"Prime_number"},{"question":"Why is pi everywhere in mathematics?","article":"Pi"},{"question":"What is the Pythagorean theorem really about?","article":"Pythagorean_theorem"},{"question":"Is every even number the sum of two primes?","article":"Goldbach%27s_conjecture"},{"question":"What is calculus, and why was it invented?","article":"Calculus"},{"question":"What is a fractal?","article":"Fractal"},{"question":"What is game theory?","article":"Game_theory"},{"question":"What is the golden ratio, and why does it appear in nature?","article":"Golden_ratio"},{"question":"What did Gödel prove about the limits of math?","article":"G%C3%B6del%27s_incompleteness_theorems"},{"question":"What is probability, really?","article":"Probability"},{"question":"What is the Fibonacci sequence?","article":"Fibonacci_sequence"},{"question":"Why is the number e so important?","article":"E_(mathematical_constant)"},{"question":"What is the Riemann hypothesis, and why does it matter?","article":"Riemann_hypothesis"},{"question":"How does cryptography use mathematics?","article":"Cryptography"},{"question":"What is a Turing machine?","article":"Turing_machine"},{"question":"What is chaos theory?","article":"Chaos_theory"},{"question":"What is the Monty Hall problem?","article":"Monty_Hall_problem"},{"question":"What is a proof, and why does it matter?","article":"Mathematical_proof"},{"question":"What is topology?","article":"Topology"},{"question":"What is the prisoner's dilemma?","article":"Prisoner%27s_dilemma"},{"question":"What are imaginary numbers, and are they real?","article":"Imaginary_number"},{"question":"What is Euler's identity, and why is it beautiful?","article":"Euler%27s_identity"},{"question":"How do algorithms work?","article":"Algorithm"},{"question":"What is Bayesian reasoning?","article":"Bayesian_inference"},{"question":"What is the birthday paradox?","article":"Birthday_problem"},{"question":"What is a logarithm?","article":"Logarithm"},{"question":"What is the four color theorem?","article":"Four_color_theorem"},{"question":"What is set theory?","article":"Set_theory"},{"question":"What is the traveling salesman problem?","article":"Travelling_salesman_problem"},{"question":"What is statistics?","article":"Statistics"},{"question":"What is a normal distribution, and why is it everywhere?","article":"Normal_distribution"},{"question":"What is the P vs NP problem?","article":"P_versus_NP_problem"},{"question":"How does machine learning use linear algebra?","article":"Linear_algebra"}],"physics":[{"question":"What is gravity, really?","article":"Gravity"},{"question":"What is the speed of light, and why is it the limit?","article":"Speed_of_light"},{"question":"What is quantum mechanics?","article":"Quantum_mechanics"},{"question":"What is dark matter?","article":"Dark_matter"},{"question":"How does Einstein's theory of relativity work?","article":"Theory_of_relativity"},{"question":"What is the Big Bang?","article":"Big_Bang"},{"question":"What is a black hole?","article":"Black_hole"},{"question":"What are the fundamental forces of nature?","article":"Fundamental_interaction"},{"question":"What is entropy, and why does it always increase?","article":"Entropy"},{"question":"What is the Higgs boson?","article":"Higgs_boson"},{"question":"What is Schrödinger's cat really about?","article":"Schr%C3%B6dinger%27s_cat"},{"question":"What is string theory?","article":"String_theory"},{"question":"What is the Standard Model of particle physics?","article":"Standard_Model"},{"question":"How does nuclear energy work?","article":"Nuclear_power"},{"question":"What is electromagnetism?","article":"Electromagnetism"},{"question":"What is the wave-particle duality?","article":"Wave%E2%80%93particle_duality"},{"question":"What is dark energy?","article":"Dark_energy"},{"question":"How do lasers work?","article":"Laser"},{"question":"What is the uncertainty principle?","article":"Uncertainty_principle"},{"question":"What is thermodynamics?","article":"Thermodynamics"},{"question":"What is antimatter?","article":"Antimatter"},{"question":"What is the multiverse hypothesis?","article":"Multiverse"},{"question":"What is quantum entanglement?","article":"Quantum_entanglement"},{"question":"What is superconductivity?","article":"Superconductivity"},{"question":"What are gravitational waves?","article":"Gravitational_wave"},{"question":"How does a nuclear bomb work?","article":"Nuclear_weapon"},{"question":"What is the Doppler effect?","article":"Doppler_effect"},{"question":"What is plasma, the fourth state of matter?","article":"Plasma_(physics)"},{"question":"What is special relativity?","article":"Special_relativity"},{"question":"What is the photoelectric effect?","article":"Photoelectric_effect"},{"question":"What is the theory of everything?","article":"Theory_of_everything"},{"question":"How do semiconductors work?","article":"Semiconductor"},{"question":"What is the double-slit experiment?","article":"Double-slit_experiment"},{"question":"What is time dilation?","article":"Time_dilation"},{"question":"What is the cosmic microwave background?","article":"Cosmic_microwave_background"}],"chemistry":[{"question":"What is the periodic table, and how is it organized?","article":"Periodic_table"},{"question":"What is an atom?","article":"Atom"},{"question":"Why does water have such unusual properties?","article":"Properties_of_water"},{"question":"What is a chemical bond?","article":"Chemical_bond"},{"question":"Why do some metals rust?","article":"Rust"},{"question":"What is the difference between acids and bases?","article":"Acid%E2%80%93base_reaction"},{"question":"What is organic chemistry?","article":"Organic_chemistry"},{"question":"How does a battery work?","article":"Battery_(electricity)"},{"question":"What is radioactivity?","article":"Radioactive_decay"},{"question":"What is a molecule?","article":"Molecule"},{"question":"What is a chemical reaction?","article":"Chemical_reaction"},{"question":"What are noble gases, and why don't they react?","article":"Noble_gas"},{"question":"What is carbon, and why is it the basis of life?","article":"Carbon"},{"question":"What is a catalyst, and how does it speed up reactions?","article":"Catalysis"},{"question":"What is pH?","article":"PH"},{"question":"What makes gold so chemically special?","article":"Gold"},{"question":"How does soap clean things?","article":"Soap"},{"question":"What is oxidation?","article":"Redox"},{"question":"What is the chemistry behind cooking?","article":"Maillard_reaction"},{"question":"What are polymers?","article":"Polymer"},{"question":"What is a protein, chemically?","article":"Protein"},{"question":"How was the periodic table discovered?","article":"History_of_the_periodic_table"},{"question":"What is an isotope?","article":"Isotope"},{"question":"What is electrochemistry?","article":"Electrochemistry"},{"question":"What makes something poisonous?","article":"Toxicity"},{"question":"What is a crystal?","article":"Crystal"},{"question":"How do fireworks get their colors?","article":"Fireworks"},{"question":"What is the chemistry of photosynthesis?","article":"Photosynthesis"},{"question":"What is an enzyme?","article":"Enzyme"},{"question":"What is the ozone layer, and how does it protect us?","article":"Ozone_layer"},{"question":"What is a covalent bond?","article":"Covalent_bond"},{"question":"How do drugs interact with the body chemically?","article":"Pharmacology"},{"question":"What is nanotechnology?","article":"Nanotechnology"},{"question":"What is hydrogen, and could it fuel our future?","article":"Hydrogen"},{"question":"What is fermentation?","article":"Fermentation"}],"biology":[{"question":"What is DNA, and how does it work?","article":"DNA"},{"question":"How does evolution by natural selection work?","article":"Evolution"},{"question":"What is a cell?","article":"Cell_(biology)"},{"question":"How does the human brain work?","article":"Human_brain"},{"question":"What is a virus?","article":"Virus"},{"question":"How does the immune system fight disease?","article":"Immune_system"},{"question":"What is photosynthesis?","article":"Photosynthesis"},{"question":"How do genes get passed from parents to children?","article":"Genetics"},{"question":"What is a species?","article":"Species"},{"question":"What caused the extinction of the dinosaurs?","article":"Cretaceous%E2%80%93Paleogene_extinction_event"},{"question":"How do ecosystems work?","article":"Ecosystem"},{"question":"What is CRISPR, and how is it changing biology?","article":"CRISPR_gene_editing"},{"question":"How does the human heart work?","article":"Heart"},{"question":"What is cancer, biologically?","article":"Cancer"},{"question":"What are stem cells?","article":"Stem_cell"},{"question":"How does memory work in the brain?","article":"Memory"},{"question":"What is the microbiome?","article":"Human_microbiome"},{"question":"How do antibiotics work?","article":"Antibiotic"},{"question":"What is the tree of life?","article":"Tree_of_life_(biology)"},{"question":"How do organisms adapt to extreme environments?","article":"Extremophile"},{"question":"What is mitosis?","article":"Mitosis"},{"question":"How does the nervous system work?","article":"Nervous_system"},{"question":"What is biodiversity, and why does it matter?","article":"Biodiversity"},{"question":"How do plants reproduce?","article":"Plant_reproduction"},{"question":"What is the theory of endosymbiosis?","article":"Endosymbiont"},{"question":"How does sleep affect the body?","article":"Sleep"},{"question":"What are hormones?","article":"Hormone"},{"question":"What is the Cambrian explosion?","article":"Cambrian_explosion"},{"question":"How do bacteria develop antibiotic resistance?","article":"Antimicrobial_resistance"},{"question":"What is RNA, and how does it differ from DNA?","article":"RNA"},{"question":"What is epigenetics?","article":"Epigenetics"},{"question":"How does the respiratory system work?","article":"Respiratory_system"},{"question":"What is symbiosis?","article":"Symbiosis"},{"question":"How do neurons communicate?","article":"Neurotransmitter"},{"question":"What is cloning?","article":"Cloning"}],"anthropology":[{"question":"What is human evolution?","article":"Human_evolution"},{"question":"Why do humans walk upright?","article":"Bipedalism"},{"question":"What is culture?","article":"Culture"},{"question":"How did language evolve?","article":"Origin_of_language"},{"question":"Who were the Neanderthals?","article":"Neanderthal"},{"question":"What is race, biologically and culturally?","article":"Race_(human_categorization)"},{"question":"How did humans migrate out of Africa?","article":"Early_human_migrations"},{"question":"What makes humans different from other primates?","article":"Human"},{"question":"What is kinship, and why does it vary across cultures?","article":"Kinship"},{"question":"How did early humans use tools?","article":"Stone_tool"},{"question":"What is the role of ritual in human societies?","article":"Ritual"},{"question":"What is the anthropology of religion?","article":"Anthropology_of_religion"},{"question":"How do different cultures understand gender?","article":"Gender_role"},{"question":"What was the Neolithic Revolution?","article":"Neolithic_Revolution"},{"question":"How do indigenous peoples maintain their cultures?","article":"Indigenous_peoples"},{"question":"What is ethnocentrism?","article":"Ethnocentrism"},{"question":"How did cooking change human evolution?","article":"Control_of_fire_by_early_humans"},{"question":"What is cultural anthropology?","article":"Cultural_anthropology"},{"question":"What is the sapient paradox?","article":"Behavioral_modernity"},{"question":"How do societies create social hierarchies?","article":"Social_stratification"},{"question":"Who was Lucy, the famous fossil?","article":"Lucy_(Australopithecus)"},{"question":"What is the nature vs. nurture debate?","article":"Nature_versus_nurture"},{"question":"How do taboos function in human societies?","article":"Taboo"},{"question":"What is the incest taboo, and why is it universal?","article":"Incest_taboo"},{"question":"How do gift economies work?","article":"Gift_economy"},{"question":"What is the 'other' in anthropology?","article":"Other_(philosophy)"},{"question":"What is structural anthropology?","article":"Structural_anthropology"},{"question":"How did burial practices evolve?","article":"Burial"},{"question":"What is the oldest known art?","article":"Prehistoric_art"},{"question":"Why do humans tell stories?","article":"Storytelling"},{"question":"What is the 'noble savage' concept?","article":"Noble_savage"},{"question":"How do hunter-gatherer societies organize?","article":"Hunter-gatherer"},{"question":"What is totemism?","article":"Totemism"},{"question":"How does globalization affect indigenous cultures?","article":"Cultural_globalization"},{"question":"What is the anthropological concept of 'mana'?","article":"Mana"}],"history":[{"question":"Why did ancient civilizations develop near rivers?","article":"River_valley_civilization"},{"question":"What caused the fall of the Roman Empire?","article":"Fall_of_the_Western_Roman_Empire"},{"question":"How did the Industrial Revolution change society?","article":"Industrial_Revolution"},{"question":"What was the French Revolution?","article":"French_Revolution"},{"question":"What caused World War I?","article":"Causes_of_World_War_I"},{"question":"What caused World War II?","article":"Causes_of_World_War_II"},{"question":"What was the Renaissance?","article":"Renaissance"},{"question":"How did the transatlantic slave trade shape the world?","article":"Atlantic_slave_trade"},{"question":"What was the Cold War?","article":"Cold_War"},{"question":"How were the Egyptian pyramids built?","article":"Egyptian_pyramids"},{"question":"What was the Black Death, and how did it reshape Europe?","article":"Black_Death"},{"question":"What was the Silk Road?","article":"Silk_Road"},{"question":"How did democracy originate in ancient Athens?","article":"Athenian_democracy"},{"question":"What was the Age of Exploration?","article":"Age_of_Discovery"},{"question":"What was the Enlightenment?","article":"Age_of_Enlightenment"},{"question":"How did the American Revolution happen?","article":"American_Revolution"},{"question":"What was the Holocaust?","article":"The_Holocaust"},{"question":"What was the Ottoman Empire?","article":"Ottoman_Empire"},{"question":"How did the printing press change the world?","article":"Printing_press"},{"question":"What was the Mongol Empire?","article":"Mongol_Empire"},{"question":"What happened during the partition of India?","article":"Partition_of_India"},{"question":"How did the Roman Republic become an empire?","article":"Roman_Republic"},{"question":"What was the Scientific Revolution?","article":"Scientific_Revolution"},{"question":"What were the Crusades?","article":"Crusades"},{"question":"How did ancient Greece influence Western civilization?","article":"Ancient_Greece"},{"question":"What was the Berlin Wall?","article":"Berlin_Wall"},{"question":"What was the Meiji Restoration?","article":"Meiji_Restoration"},{"question":"How did colonialism shape Africa?","article":"Scramble_for_Africa"},{"question":"What was the Russian Revolution?","article":"Russian_Revolution"},{"question":"What was the Tang Dynasty, and why was it a golden age?","article":"Tang_dynasty"},{"question":"What was the Protestant Reformation?","article":"Reformation"},{"question":"How did the civil rights movement change America?","article":"Civil_rights_movement"},{"question":"What was the Spanish Inquisition?","article":"Spanish_Inquisition"},{"question":"How did the Roman road system unite an empire?","article":"Roman_roads"},{"question":"What was the Rwandan genocide?","article":"Rwandan_genocide"},{"question":"What was the Magna Carta?","article":"Magna_Carta"},{"question":"How did Mesopotamia invent writing?","article":"Cuneiform"},{"question":"What was the space race?","article":"Space_Race"},{"question":"What was the Haitian Revolution?","article":"Haitian_Revolution"},{"question":"How did the Great Depression affect the world?","article":"Great_Depression"}]};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activeIndex = -1;
+let typewriterTimer = null;
+const usedQuestions = {};
+DISCIPLINES.forEach(d => { usedQuestions[d.id] = new Set(); });
+
+// ═══════════════════════════════════════
+// SCREEN NAVIGATION
+// ═══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToLanding() {
+  stopTypewriter();
+  if (activeIndex >= 0) closeDiscipline();
+  showScreen('landing');
+}
+
+function goToIntro() {
+  showScreen('intro');
+  startTypewriter();
+}
+
+function goToCircles() {
+  stopTypewriter();
+  showScreen('circles-screen');
+}
+
+// ═══════════════════════════════════════
+// TYPEWRITER (line-by-line with continue)
+// ═══════════════════════════════════════
+let introLineIndex = 0;
+let introCharIndex = 0;
+let introTyping = false;
+
+function stopTypewriter() {
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+  introTyping = false;
+}
+
+function startTypewriter() {
+  const el = document.getElementById('intro-text');
+  el.innerHTML = '';
+  introLineIndex = 0;
+  introCharIndex = 0;
+  introTyping = false;
+  setTimeout(() => typeLine(), 400);
+}
+
+function typeLine() {
+  if (introLineIndex >= INTRO_LINES.length) {
+    showFinalPrompt();
+    return;
+  }
+
+  introTyping = true;
+  introCharIndex = 0;
+  const el = document.getElementById('intro-text');
+  const wrapper = document.getElementById('intro-wrapper');
+  const line = INTRO_LINES[introLineIndex];
+
+  // Create a span for this line
+  const lineSpan = document.createElement('span');
+  lineSpan.className = 'intro-line';
+  lineSpan.dataset.index = introLineIndex;
+
+  // Add cursor
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  lineSpan.appendChild(cursor);
+
+  el.appendChild(lineSpan);
+  wrapper.scrollTop = wrapper.scrollHeight;
+
+  const speed = 22;
+
+  function typeChar() {
+    if (introCharIndex < line.length) {
+      const c = line[introCharIndex];
+      lineSpan.insertBefore(document.createTextNode(c), cursor);
+      introCharIndex++;
+      wrapper.scrollTop = wrapper.scrollHeight;
+
+      let delay = speed;
+      if (c === '.' || c === '?') delay = speed * 5;
+      else if (c === ',') delay = speed * 3;
+
+      typewriterTimer = setTimeout(typeChar, delay);
+    } else {
+      // Line done — remove cursor, show continue button
+      cursor.remove();
+      introTyping = false;
+
+      // Add line break after this line
+      el.appendChild(document.createElement('br'));
+      el.appendChild(document.createElement('br'));
+
+      if (introLineIndex < INTRO_LINES.length - 1) {
+        showContinueBtn();
+      } else {
+        showFinalPrompt();
+      }
+    }
+  }
+
+  typewriterTimer = setTimeout(typeChar, 300);
+}
+
+function showContinueBtn() {
+  const el = document.getElementById('intro-text');
+  const wrapper = document.getElementById('intro-wrapper');
+
+  const btn = document.createElement('button');
+  btn.className = 'continue-btn';
+  btn.textContent = '▸ continue';
+  btn.id = 'continue-btn';
+  btn.onclick = function() {
+    btn.remove();
+    introLineIndex++;
+    typeLine();
+  };
+  el.appendChild(btn);
+  wrapper.scrollTop = wrapper.scrollHeight;
+}
+
+function showFinalPrompt() {
+  const el = document.getElementById('intro-text');
+  const wrapper = document.getElementById('intro-wrapper');
+
+  const cont = document.createElement('div');
+  cont.style.cssText = 'margin-top:1.5rem; text-align:center;';
+  cont.innerHTML = '<button class="menu-item" onclick="goToCircles()" style="font-size:0.55rem; color:#888">▸ EXPLORE ALL KNOWLEDGE ▸</button>';
+  el.appendChild(cont);
+  wrapper.scrollTop = wrapper.scrollHeight;
+}
+
+// ═══════════════════════════════════════
+// CIRCLES
+// ═══════════════════════════════════════
+function getExpandedSizes(activeIdx) {
+  const sizes = [];
+  const activeSize = 72;
+  const outerCount = activeIdx;
+  for (let i = 0; i < DISCIPLINES.length; i++) {
+    if (i < activeIdx) {
+      const outerBand = (100 - activeSize) / (outerCount + 1);
+      sizes.push(100 - outerBand * (activeIdx - i));
+    } else if (i === activeIdx) {
+      sizes.push(activeSize);
+    } else {
+      sizes.push(0);
+    }
+  }
+  return sizes;
+}
+
+function buildRings() {
+  const container = document.getElementById('circles-container');
+  DISCIPLINES.forEach((d, i) => {
+    const ring = document.createElement('div');
+    ring.className = 'ring';
+    ring.id = 'ring-' + i;
+    ring.style.width = d.pct + '%';
+    ring.style.height = d.pct + '%';
+    ring.style.backgroundColor = d.bg;
+    ring.style.border = '2px solid ' + d.color;
+    ring.style.zIndex = i;
+
+    const label = document.createElement('span');
+    label.className = 'ring-label';
+    label.textContent = d.name;
+    label.style.color = d.color;
+    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
+    label.style.top = ((d.pct - nextPct) / d.pct * 50 / 2) + '%';
+    label.style.left = '50%';
+    label.style.transform = 'translate(-50%, -50%)';
+    ring.appendChild(label);
+
+    const detail = document.createElement('div');
+    detail.className = 'detail-content';
+    detail.id = 'detail-' + i;
+    ring.appendChild(detail);
+
+    container.appendChild(ring);
+
+    ring.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeIndex === i) return;
+      if (activeIndex >= 0 && i > activeIndex) return;
+      openDiscipline(i);
+    });
+  });
+}
+
+function fitLabels() {
+  const container = document.getElementById('circles-container');
+  const containerW = container.offsetWidth;
+  if (!containerW) return;
+
+  DISCIPLINES.forEach((d, i) => {
+    const ring = document.getElementById('ring-' + i);
+    const label = ring.querySelector('.ring-label');
+    // Ring diameter in px
+    const ringW = ring.offsetWidth;
+    // Next inner ring diameter
+    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
+    // Available width is roughly the chord at the label's vertical position
+    // The label sits in the band between this ring and the next inner ring
+    // Use ~90% of the ring width as max label width (label is centered)
+    const maxLabelW = ringW * 0.85;
+    // Start with the base clamp size
+    const basePx = Math.min(Math.max(0.4 * 16, 1.2 / 100 * window.innerWidth), 0.6 * 16);
+    label.style.fontSize = basePx + 'px';
+    // Measure and shrink if needed
+    let labelW = label.scrollWidth;
+    let fontSize = basePx;
+    const minFontSize = 4; // absolute minimum in px
+    while (labelW > maxLabelW && fontSize > minFontSize) {
+      fontSize -= 0.5;
+      label.style.fontSize = fontSize + 'px';
+      labelW = label.scrollWidth;
+    }
+  });
+}
+
+function openDiscipline(index) {
+  activeIndex = index;
+  const d = DISCIPLINES[index];
+  const sizes = getExpandedSizes(index);
+
+  document.getElementById('circles-container').classList.add('expanded');
+  document.getElementById('app-header').classList.add('hidden');
+
+  DISCIPLINES.forEach((disc, i) => {
+    const ring = document.getElementById('ring-' + i);
+    const label = ring.querySelector('.ring-label');
+
+    if (sizes[i] === 0) {
+      ring.classList.add('inner-hidden');
+      ring.style.width = '0%';
+      ring.style.height = '0%';
+    } else {
+      ring.classList.remove('inner-hidden');
+      ring.style.width = sizes[i] + '%';
+      ring.style.height = sizes[i] + '%';
+    }
+
+    if (i === index) {
+      ring.classList.add('active');
+      ring.style.cursor = 'default';
+
+      const detail = document.getElementById('detail-' + i);
+      detail.style.color = d.text;
+      detail.innerHTML = `
+        <button class="back-btn" onclick="event.stopPropagation(); closeDiscipline();" style="color:${d.text}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          BACK
+        </button>
+        <h2 style="color:${d.color}">${d.name}</h2>
+        <p class="detail-description" style="color:${d.text}">${d.description}</p>
+        <div class="detail-ontology" style="color:${d.color}; border-color:${d.color}33">ONTOLOGY: ${d.ontology}</div>
+        <div class="questions-header">
+          <h3 style="color:${d.text}">Questions</h3>
+          <button class="refresh-btn" onclick="event.stopPropagation(); refreshQuestions();" style="color:${d.text}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            NEW
+          </button>
+        </div>
+        <div class="questions-list" id="questions-list"></div>
+      `;
+      setTimeout(() => detail.classList.add('visible'), 100);
+      loadQuestions(d.id);
+    } else if (i < index) {
+      ring.classList.remove('active');
+      ring.style.cursor = 'pointer';
+      const nextSize = sizes[i + 1] || 0;
+      const bandRatio = (sizes[i] - nextSize) / sizes[i];
+      label.style.top = (bandRatio * 50 / 2) + '%';
+    }
+  });
+  // Re-fit labels after expansion transition
+  setTimeout(() => fitLabels(), 750);
+}
+
+function closeDiscipline() {
+  if (activeIndex < 0) return;
+  const detail = document.getElementById('detail-' + activeIndex);
+  detail.classList.remove('visible');
+
+  document.getElementById('circles-container').classList.remove('expanded');
+  document.getElementById('app-header').classList.remove('hidden');
+
+  DISCIPLINES.forEach((d, i) => {
+    const ring = document.getElementById('ring-' + i);
+    const label = ring.querySelector('.ring-label');
+    ring.classList.remove('active', 'inner-hidden');
+    ring.style.width = d.pct + '%';
+    ring.style.height = d.pct + '%';
+    ring.style.cursor = 'pointer';
+    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
+    label.style.top = ((d.pct - nextPct) / d.pct * 50 / 2) + '%';
+  });
+
+  setTimeout(() => { detail.innerHTML = ''; }, 500);
+  activeIndex = -1;
+  // Re-fit labels after transition completes
+  setTimeout(() => fitLabels(), 750);
+}
+
+// ═══════════════════════════════════════
+// QUESTIONS
+// ═══════════════════════════════════════
+function pickRandomQuestions(disciplineId, count = 3) {
+  const pool = QUESTIONS_DB[disciplineId];
+  if (!pool) return [];
+  const used = usedQuestions[disciplineId];
+  if (used.size >= pool.length - count) used.clear();
+  const available = pool.filter((_, i) => !used.has(i));
+  const picked = [], copy = [...available];
+  for (let i = 0; i < Math.min(count, copy.length); i++) {
+    const idx = Math.floor(Math.random() * copy.length);
+    const item = copy.splice(idx, 1)[0];
+    used.add(pool.indexOf(item));
+    picked.push(item);
+  }
+  return picked;
+}
+
+function renderCards(questions, d) {
+  return questions.map(q => `
+    <div class="question-card">
+      <div class="q-text" style="color:${d.text}">${q.question}</div>
+      <a class="q-link" href="https://en.wikipedia.org/wiki/${q.article}" target="_blank" rel="noopener" style="color:${d.color}" onclick="event.stopPropagation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        Wikipedia
+      </a>
+    </div>
+  `).join('');
+}
+
+function loadQuestions(disciplineId) {
+  const d = DISCIPLINES.find(x => x.id === disciplineId);
+  const picked = pickRandomQuestions(disciplineId);
+  if (!picked.length) return;
+  const list = document.getElementById('questions-list');
+  if (list) list.innerHTML = renderCards(picked, d);
+}
+
+function refreshQuestions() {
+  if (activeIndex >= 0) loadQuestions(DISCIPLINES[activeIndex].id);
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (activeIndex >= 0) closeDiscipline();
+    else if (document.getElementById('intro').classList.contains('active')) goToLanding();
+    else if (document.getElementById('circles-screen').classList.contains('active')) goToLanding();
+  }
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+buildRings();
+// Fit labels once fonts have loaded, and on resize
+requestAnimationFrame(() => fitLabels());
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => fitLabels());
+}
+window.addEventListener('resize', () => fitLabels());
+</script>
+</body>
+</html>
