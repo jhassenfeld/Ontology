@@ -276,10 +276,10 @@ html, body {
 
 .ring-label {
   font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.4rem, 1.2vw, 0.6rem);
   pointer-events: none;
   white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 0.4s ease, transform 0.4s ease, font-size 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   position: absolute;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -463,6 +463,7 @@ html, body {
   .menu-item { font-size: 0.55rem; }
   .detail-content h2 { font-size: 1.4rem; }
   .detail-content { max-height: 68%; padding: 0.5rem; }
+  .ring-label { font-size: 0.38rem; }
 }
 </style>
 </head>
@@ -756,37 +757,6 @@ function buildRings() {
   });
 }
 
-function fitLabels() {
-  const container = document.getElementById('circles-container');
-  const containerW = container.offsetWidth;
-  if (!containerW) return;
-
-  DISCIPLINES.forEach((d, i) => {
-    const ring = document.getElementById('ring-' + i);
-    const label = ring.querySelector('.ring-label');
-    // Ring diameter in px
-    const ringW = ring.offsetWidth;
-    // Next inner ring diameter
-    const nextPct = i < DISCIPLINES.length - 1 ? DISCIPLINES[i + 1].pct : 0;
-    // Available width is roughly the chord at the label's vertical position
-    // The label sits in the band between this ring and the next inner ring
-    // Use ~90% of the ring width as max label width (label is centered)
-    const maxLabelW = ringW * 0.85;
-    // Start with the base clamp size
-    const basePx = Math.min(Math.max(0.4 * 16, 1.2 / 100 * window.innerWidth), 0.6 * 16);
-    label.style.fontSize = basePx + 'px';
-    // Measure and shrink if needed
-    let labelW = label.scrollWidth;
-    let fontSize = basePx;
-    const minFontSize = 4; // absolute minimum in px
-    while (labelW > maxLabelW && fontSize > minFontSize) {
-      fontSize -= 0.5;
-      label.style.fontSize = fontSize + 'px';
-      labelW = label.scrollWidth;
-    }
-  });
-}
-
 function openDiscipline(index) {
   activeIndex = index;
   const d = DISCIPLINES[index];
@@ -845,8 +815,6 @@ function openDiscipline(index) {
       label.style.top = (bandRatio * 50 / 2) + '%';
     }
   });
-  // Re-fit labels after expansion transition
-  setTimeout(() => fitLabels(), 750);
 }
 
 function closeDiscipline() {
@@ -870,8 +838,6 @@ function closeDiscipline() {
 
   setTimeout(() => { detail.innerHTML = ''; }, 500);
   activeIndex = -1;
-  // Re-fit labels after transition completes
-  setTimeout(() => fitLabels(), 750);
 }
 
 // ═══════════════════════════════════════
@@ -935,12 +901,6 @@ document.addEventListener('keydown', e => {
 // INIT
 // ═══════════════════════════════════════
 buildRings();
-// Fit labels once fonts have loaded, and on resize
-requestAnimationFrame(() => fitLabels());
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => fitLabels());
-}
-window.addEventListener('resize', () => fitLabels());
 </script>
 </body>
 </html>
